@@ -14,7 +14,7 @@ from output.OutputPublisher import NTOutputPublisher, OutputPublisher
 from output.overlay_util import *
 from output.StreamServer import MjpegServer
 from pipeline.CameraPoseEstimator import MultiTargetCameraPoseEstimator
-from pipeline.Capture import GStreamerCapture
+from pipeline.Capture import DefaultCapture, GStreamerCapture, StaticCapture
 from pipeline.FiducialDetector import ArucoFiducialDetector
 from pipeline.PoseEstimator import SquareTargetPoseEstimator
 

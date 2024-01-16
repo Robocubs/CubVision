@@ -1,6 +1,7 @@
 import dataclasses
 import sys
 import time
+import os
 from typing import Tuple
 
 import cv2
@@ -29,6 +30,27 @@ class Capture:
         remote_b = config_b.remote_config
 
         return remote_a.camera_id != remote_b.camera_id or remote_a.camera_resolution_width != remote_b.camera_resolution_width or remote_a.camera_resolution_height != remote_b.camera_resolution_height or remote_a.camera_auto_exposure != remote_b.camera_auto_exposure or remote_a.camera_exposure != remote_b.camera_exposure or remote_a.camera_gain != remote_b.camera_gain
+
+class StaticCapture(Capture):
+    """Read from an image directory, and returns the frames (Usually for testing)"""
+    _src: list = []
+    _last_change: float = 0.0
+    _index: int = -1
+
+    def __init__(self, s) -> None:
+        self._src = s
+
+    def get_frame(self, config_store: ConfigStore) -> Tuple[bool, cv2.Mat]:
+        c = time.time()
+        if c - self._last_change > 5.0:
+            self._last_change = c
+            if self._index == len(self._src) - 1:
+                self._index = -1
+            self._index += 1
+
+        image = cv2.imread(self._src[self._index])
+        retval = 1
+        return retval, image
 
 
 class DefaultCapture(Capture):
