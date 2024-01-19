@@ -19,6 +19,7 @@ matplotlib-inline==0.1.6
 mypy-extensions==1.0.0
 nest-asyncio==1.5.8
 numpy==1.26.3
+opencv-contrib-python==4.7.0.68
 opencv-python==4.7.0.68
 packaging==23.2
 parso==0.8.3
@@ -31,14 +32,15 @@ psutil==5.9.7
 ptyprocess==0.7.0
 pure-eval==0.2.2
 Pygments==2.17.2
+pyntcore==2024.1.1.1
 pyparsing==3.1.1
 python-dateutil==2.8.2
 pyzmq==25.1.2
-robotpy-wpimath==2023.4.3.1
-robotpy-wpiutil==2023.4.3.0
+robotpy-wpimath==2024.1.1.1
+robotpy-wpinet==2024.1.1.1
+robotpy-wpiutil==2024.1.1.1
 six==1.16.0
 stack-data==0.6.3
 tornado==6.4
 traitlets==5.14.1
 wcwidth==0.2.12
-opencv-contrib-python==4.7.0.68

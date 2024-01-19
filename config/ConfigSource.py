@@ -53,7 +53,7 @@ class NTConfigSource(ConfigSource):
         # Initialize subscribers on first call
         if not self._init_complete:
             nt_table = ntcore.NetworkTableInstance.getDefault().getTable(
-                "/" + config_store.local_config.device_id + "/config")
+                "CubStar/" + config_store.local_config.device_id + "/config")
             self._camera_id_sub = nt_table.getIntegerTopic("camera_id").subscribe(RemoteConfig.camera_id)
             self._camera_resolution_width_sub = nt_table.getIntegerTopic(
                 "camera_resolution_width").subscribe(RemoteConfig.camera_resolution_width)

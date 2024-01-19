@@ -40,8 +40,10 @@ if __name__ == "__main__":
     stream_server.start(config)
 
     frame_count = 0
+    latency_sum = 0
     last_print = 0
     was_calibrating = False
+    last_frame_caputre_time = time.time()
     while True:
         remote_config_source.update(config)
         timestamp = time.time()
@@ -51,12 +53,15 @@ if __name__ == "__main__":
             continue
 
         fps = None
+        latency = None
         frame_count += 1
-        if time.time() - last_print > 1:
-            last_print = time.time()
+        frame_capture_time = time.time()
+        if frame_capture_time - last_print > 1:
+            last_print = frame_capture_time
             fps = frame_count
-            print("Running at", frame_count, "fps")
+            print("Running at", frame_count, "fps, avg latency", int(latency_sum / frame_count), "ms")
             frame_count = 0
+            latency_sum = 0
 
         if calibration_command_source.get_calibrating(config):
             # Calibration mode
@@ -78,11 +83,14 @@ if __name__ == "__main__":
             demo_pose_observation: Union[FiducialPoseObservation, None] = None
             if len(demo_image_observations) > 0:
                 demo_pose_observation = tag_pose_estimator.solve_fiducial_pose(demo_image_observations[0], config)
-            output_publisher.send(config, timestamp, camera_pose_observation, demo_pose_observation, fps)
+            latency = int((time.time() - frame_capture_time) * 1000)
+            latency_sum += latency
+            output_publisher.send(config, timestamp, camera_pose_observation, demo_pose_observation, fps, latency)
 
         else:
             # No calibration
             print("No calibration found")
             time.sleep(0.5)
 
-        stream_server.set_frame(image)
+        last_frame_caputre_time = frame_capture_time
+        stream_server.set_frame(image, fps, latency)

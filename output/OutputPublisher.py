@@ -7,7 +7,7 @@ from vision_types import CameraPoseObservation, FiducialPoseObservation
 
 
 class OutputPublisher:
-    def send(self, config_store: ConfigStore, timestamp: float, observation: Union[CameraPoseObservation, None], demo_observation: Union[FiducialPoseObservation, None], fps: Union[int, None] = None) -> None:
+    def send(self, config_store: ConfigStore, timestamp: float, observation: Union[CameraPoseObservation, None], demo_observation: Union[FiducialPoseObservation, None], fps: Union[int, None]) -> None:
         raise NotImplementedError
 
 
@@ -17,11 +17,11 @@ class NTOutputPublisher(OutputPublisher):
     _observations_pub: ntcore.DoubleArrayPublisher
     _fps_pub: ntcore.IntegerPublisher
 
-    def send(self, config_store: ConfigStore, timestamp: float, observation: Union[CameraPoseObservation, None], demo_observation: Union[FiducialPoseObservation, None], fps: Union[int, None] = None) -> None:
+    def send(self, config_store: ConfigStore, timestamp: float, observation: Union[CameraPoseObservation, None], demo_observation: Union[FiducialPoseObservation, None], fps: Union[int, None], latency: int) -> None:
         # Initialize publishers on first call
         if not self._init_complete:
             nt_table = ntcore.NetworkTableInstance.getDefault().getTable(
-                "/" + config_store.local_config.device_id + "/output")
+                "CubStar/" + config_store.local_config.device_id + "/output")
             self._observations_pub = nt_table.getDoubleArrayTopic("observations").publish(
                 ntcore.PubSubOptions(periodic=0, sendAll=True, keepDuplicates=True))
             self._demo_observations_pub = nt_table.getDoubleArrayTopic("demo_observations").publish(
@@ -31,7 +31,7 @@ class NTOutputPublisher(OutputPublisher):
         # Send data
         if fps != None:
             self._fps_pub.set(fps)
-        observation_data: List[float] = [0]
+        observation_data: List[float] = [0, latency]
         demo_observation_data: List[float] = []
         if observation != None:
             observation_data[0] = 1
