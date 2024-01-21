@@ -15,11 +15,10 @@ class FiducialDetector:
 
 class ArucoFiducialDetector(FiducialDetector):
     def __init__(self, dictionary_id) -> None:
-        self._aruco_dict = cv2.aruco.getPredefinedDictionary(dictionary_id)
-        self._aruco_params = cv2.aruco.DetectorParameters()
+        self._detector = cv2.aruco.ArucoDetector(cv2.aruco.getPredefinedDictionary(dictionary_id), cv2.aruco.DetectorParameters())
 
     def detect_fiducials(self, image: cv2.Mat, config_store: ConfigStore) -> List[FiducialImageObservation]:
-        corners, ids, _ = cv2.aruco.detectMarkers(image, self._aruco_dict, parameters=self._aruco_params)
+        corners, ids, _ = self._detector.detectMarkers(image)
         if len(corners) == 0:
             return []
         return [FiducialImageObservation(id[0], corner) for id, corner in zip(ids, corners)]

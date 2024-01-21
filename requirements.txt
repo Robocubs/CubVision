@@ -1,6 +1,5 @@
 numpy==1.26.3
-opencv-contrib-python==4.7.0.68
-opencv-python==4.7.0.68
+opencv-python==4.9.0.80
 pillow==10.2.0
 pyntcore==2024.1.1.1
 robotpy-wpimath==2024.1.1.1

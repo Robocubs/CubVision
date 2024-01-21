@@ -15,11 +15,10 @@ class FiducialImageObservation:
 @dataclass(frozen=True)
 class FiducialPoseObservation:
     tag_id: int
-    pose_0: Pose3d
+    pose_0: Transform3d
     error_0: float
-    pose_1: Pose3d
+    pose_1: Transform3d
     error_1: float
-
 
 @dataclass(frozen=True)
 class CameraPoseObservation:
