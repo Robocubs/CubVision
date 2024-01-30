@@ -1,11 +1,16 @@
 #OpenCV build artifacts
 docker/cv2/
 docker/lib/
+docker/Opencv-package-and-lib-4.x
+*.gz
 
 # Byte-compiled / optimized / DLL files
 __pycache__/
 *.py[cod]
 *$py.class
+
+#MacOS Cache
+*.DS_Store
 
 # C extensions
 *.so
