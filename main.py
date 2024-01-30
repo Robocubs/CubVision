@@ -10,7 +10,7 @@ from calibration.CalibrationCommandSource import (CalibrationCommandSource,
 from calibration.CalibrationSession import CalibrationSession
 from config.config import ConfigStore, LocalConfig, RemoteConfig
 from config.ConfigSource import ConfigSource, FileConfigSource, NTConfigSource
-from output.OutputPublisher import NTOutputPublisher, OutputPublisher
+from output.OutputPublisher import NTPacketPublisher, OutputPublisher
 from output.overlay_util import *
 from output.StreamServer import MjpegServer
 from pipeline.CameraPoseEstimator import MultiTargetCameraPoseEstimator
@@ -30,7 +30,7 @@ if __name__ == "__main__":
     fiducial_detector = ArucoFiducialDetector(cv2.aruco.DICT_APRILTAG_36h11)
     camera_pose_estimator = MultiTargetCameraPoseEstimator()
     tag_pose_estimator = SquareTargetPoseEstimator()
-    output_publisher: OutputPublisher = NTOutputPublisher()
+    output_publisher: OutputPublisher = NTPacketPublisher()
     stream_server = MjpegServer()
     calibration_session = CalibrationSession()
 
@@ -77,15 +77,15 @@ if __name__ == "__main__":
             # Normal mode
             image_observations = fiducial_detector.detect_fiducials(image, config)
             [overlay_image_observation(image, x) for x in image_observations]
-            camera_pose_observation = camera_pose_estimator.solve_camera_pose(
+            fiducial_pose_observations, camera_pose_observation = camera_pose_estimator.solve_camera_pose(
                 [x for x in image_observations if x.tag_id != DEMO_ID], config)
             demo_image_observations = [x for x in image_observations if x.tag_id == DEMO_ID]
             demo_pose_observation: Union[FiducialPoseObservation, None] = None
             if len(demo_image_observations) > 0:
                 demo_pose_observation = tag_pose_estimator.solve_fiducial_pose(demo_image_observations[0], config)
-            latency = int((time.time() - frame_capture_time) * 1000)
+            latency = (time.time() - frame_capture_time) * 1000
             latency_sum += latency
-            output_publisher.send(config, timestamp, camera_pose_observation, demo_pose_observation, fps, latency)
+            output_publisher.send(config, timestamp, fiducial_pose_observations, camera_pose_observation, demo_pose_observation, fps, latency)
 
         else:
             # No calibration

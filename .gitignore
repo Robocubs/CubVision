@@ -1,3 +1,7 @@
+#OpenCV build artifacts
+docker/cv2/
+docker/lib/
+
 # Byte-compiled / optimized / DLL files
 __pycache__/
 *.py[cod]

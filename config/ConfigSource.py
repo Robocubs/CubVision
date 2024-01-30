@@ -67,8 +67,11 @@ class NTConfigSource(ConfigSource):
                 "camera_gain").subscribe(RemoteConfig.camera_gain)
             self._fiducial_size_m_sub = nt_table.getDoubleTopic(
                 "fiducial_size_m").subscribe(RemoteConfig.fiducial_size_m)
-            self._tag_layout_sub = nt_table.getStringTopic(
+            
+            global_config_table = ntcore.NetworkTableInstance.getDefault().getTable("CubStar/config")
+            self._tag_layout_sub = global_config_table.getStringTopic(
                 "tag_layout").subscribe("")
+            
             self._init_complete = True
 
         # Read config data

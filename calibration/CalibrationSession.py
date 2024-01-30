@@ -37,9 +37,12 @@ class CalibrationSession:
 
                 # Save corners
                 if save:
-                    self._all_charuco_corners.append(charuco_corners)
-                    self._all_charuco_ids.append(charuco_ids)
-                    print("Saved calibration frame")
+                    if charuco_ids.size > 4:
+                        self._all_charuco_corners.append(charuco_corners)
+                        self._all_charuco_ids.append(charuco_ids)
+                        print("Saved calibration frame")
+                    else:
+                        print("Bad frame: not enough ID's captured")
 
     def finish(self) -> None:
         if len(self._all_charuco_corners) == 0:

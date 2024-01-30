@@ -27,7 +27,7 @@ class MjpegServer(StreamServer):
     _frame: cv2.Mat
     _has_frame: bool = False
     _fps: float = 0.0
-    _latency: int = 0
+    _latency: float = 0.0
     _last_served_timestamp: float = 0.0
 
     def _make_handler(self_mjpeg):  # type: ignore
@@ -80,7 +80,7 @@ class MjpegServer(StreamServer):
                                 timestamp = time.time()
                                 frame = self_mjpeg._frame.copy()
                                 cv2.putText(frame, f"FPS: {self_mjpeg._fps:.2f}", (10, 30), cv2.FONT_HERSHEY_SIMPLEX, 1, (0, 255, 0), 2)
-                                cv2.putText(frame, f"Latency: {self_mjpeg._latency}ms", (10, 60), cv2.FONT_HERSHEY_SIMPLEX, 1, (0, 255, 0), 2)
+                                cv2.putText(frame, f"Latency: {self_mjpeg._latency:.0f}ms", (10, 60), cv2.FONT_HERSHEY_SIMPLEX, 1, (0, 255, 0), 2)
                                 cv2.putText(frame, f"Stream FPS: {(1 / (timestamp - self_mjpeg._last_served_timestamp)):.2f}", (10, 90), cv2.FONT_HERSHEY_SIMPLEX, 1, (0, 255, 0), 2)
                                 self_mjpeg._last_served_timestamp = timestamp
 
@@ -115,7 +115,7 @@ class MjpegServer(StreamServer):
     def start(self, config_store: ConfigStore) -> None:
         threading.Thread(target=self._run, daemon=True, args=(config_store.local_config.stream_port,)).start()
 
-    def set_frame(self, frame: cv2.Mat, fps: Union[float, None], latency: Union[int, None]) -> None:
+    def set_frame(self, frame: cv2.Mat, fps: Union[float, None], latency: Union[float, None]) -> None:
         if fps != None:
             self._fps = fps
         if latency != None:
