@@ -53,7 +53,7 @@ class NTConfigSource(ConfigSource):
         # Initialize subscribers on first call
         if not self._init_complete:
             nt_table = ntcore.NetworkTableInstance.getDefault().getTable(
-                "CubStar/" + config_store.local_config.device_id + "/config")
+                "CubVision/" + config_store.local_config.device_id + "/config")
             self._camera_id_sub = nt_table.getIntegerTopic("camera_id").subscribe(RemoteConfig.camera_id)
             self._camera_resolution_width_sub = nt_table.getIntegerTopic(
                 "camera_resolution_width").subscribe(RemoteConfig.camera_resolution_width)
@@ -68,7 +68,7 @@ class NTConfigSource(ConfigSource):
             self._fiducial_size_m_sub = nt_table.getDoubleTopic(
                 "fiducial_size_m").subscribe(RemoteConfig.fiducial_size_m)
             
-            global_config_table = ntcore.NetworkTableInstance.getDefault().getTable("CubStar/config")
+            global_config_table = ntcore.NetworkTableInstance.getDefault().getTable("CubVision/config")
             self._tag_layout_sub = global_config_table.getStringTopic(
                 "tag_layout").subscribe("")
             

@@ -35,7 +35,7 @@ class MjpegServer(StreamServer):
             HTML = """
     <html>
         <head>
-            <title>Cubstar Debug</title>
+            <title>CubVision Debug</title>
             <style>
                 body {
                     background-color: black;

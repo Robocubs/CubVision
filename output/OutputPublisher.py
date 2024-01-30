@@ -24,9 +24,9 @@ class NTPacketPublisher():
         # Initialize publishers on first call
         if not self._init_complete:
             nt_table = ntcore.NetworkTableInstance.getDefault().getTable(
-                "CubStar/" + config_store.local_config.device_id + "/output")
+                "CubVision/" + config_store.local_config.device_id + "/output")
             nt_table = ntcore.NetworkTableInstance.getDefault().getTable(
-                "CubStar/" + config_store.local_config.device_id + "/output")
+                "CubVision/" + config_store.local_config.device_id + "/output")
             self._observations_pub = nt_table.getRawTopic("observations").publish("ObservationsPacket",
                 ntcore.PubSubOptions(periodic=0, sendAll=True, keepDuplicates=True))
             self._demo_observations_pub = nt_table.getRawTopic("demo_observations").publish("FiducialPoseObservation",
@@ -91,7 +91,7 @@ class NTOutputPublisher(OutputPublisher):
         # Initialize publishers on first call
         if not self._init_complete:
             nt_table = ntcore.NetworkTableInstance.getDefault().getTable(
-                "CubStar/" + config_store.local_config.device_id + "/output")
+                "CubVision/" + config_store.local_config.device_id + "/output")
             self._observations_pub = nt_table.getDoubleArrayTopic("observations").publish(
                 ntcore.PubSubOptions(periodic=0, sendAll=True, keepDuplicates=True))
             self._demo_observations_pub = nt_table.getDoubleArrayTopic("demo_observations").publish(
