@@ -22,10 +22,11 @@ class SquareTargetPoseEstimator(PoseEstimator):
 
     def solve_fiducial_pose(self, image_observation: FiducialImageObservation, config_store: ConfigStore) -> Union[FiducialPoseObservation, None]:
         fid_size = config_store.remote_config.fiducial_size_m
-        object_points = numpy.array([[-fid_size / 2.0, fid_size / 2.0, 0.0],
-                                     [fid_size / 2.0, fid_size / 2.0, 0.0],
-                                     [fid_size / 2.0, -fid_size / 2.0, 0.0],
-                                     [-fid_size / 2.0, -fid_size / 2.0, 0.0]])
+        half_fid_size = fid_size / 2.0
+        object_points = numpy.array([[-half_fid_size, half_fid_size, 0.0],
+                                     [half_fid_size, half_fid_size, 0.0],
+                                     [half_fid_size, -half_fid_size, 0.0],
+                                     [-half_fid_size, -half_fid_size, 0.0]])
 
         try:
             _, rvecs, tvecs, errors = cv2.solvePnPGeneric(object_points, image_observation.corners, config_store.local_config.camera_matrix,

@@ -106,6 +106,9 @@ class GStreamerCapture(Capture):
                 # If we're running on Darwin it's probably for testing/simulation
                 if os.uname().sysname != 'Darwin':
                     # TODO: Recheck this command. I forgot to copy the commamd from the OrangePi to the official repo
+                    """
+                    gst-launch-1.0 v4l2src device=/dev/video0 extra_controls="c,exposure_auto=0,exposure_absolute=0,gain=0,sharpness=0,brightness=0" ! image/jpeg,format=MJPG,width=1280,height=720 ! jpegdec ! video/x-raw ! appsink drop=1
+                    """
                     self._video = cv2.VideoCapture("gst-launch-1.0 v4l2src device=/dev/video" + str(config_store.remote_config.camera_id) + " extra_controls=\"c,exposure_auto=" + str(config_store.remote_config.camera_auto_exposure) + ",exposure_absolute=" + str(
                         config_store.remote_config.camera_exposure) + ",gain=" + str(config_store.remote_config.camera_gain) + ",sharpness=0,brightness=0\" ! image/jpeg,format=MJPG,width=" + str(config_store.remote_config.camera_resolution_width) + ",height=" + str(config_store.remote_config.camera_resolution_height) + " ! jpegdec ! video/x-raw ! appsink drop=1", cv2.CAP_GSTREAMER)
                 else:

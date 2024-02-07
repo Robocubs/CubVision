@@ -3,6 +3,7 @@ import json
 import cv2
 import ntcore
 import numpy
+import sys
 
 from config.config import ConfigStore, RemoteConfig
 
@@ -13,13 +14,21 @@ class ConfigSource:
 
 
 class FileConfigSource(ConfigSource):
-    CONFIG_FILENAME = "config.json"
-    CALIBRATION_FILENAME = "calibration.json"
+    # Default to FL config and calib
+    CONFIG_FILENAME = "configFL.json"
+    CALIBRATION_FILENAME = "calibrationFL.json"
 
     def __init__(self) -> None:
         pass
 
     def update(self, config_store: ConfigStore) -> None:
+        # Look for specific config and calibration passed in through command line
+        try:
+            self.CONFIG_FILENAME = sys.argv[1]
+            self.CALIBRATION_FILENAME = sys.argv[2]
+        except IndexError:
+            pass
+
         # Get config
         with open(self.CONFIG_FILENAME, "r") as config_file:
             config_data = json.loads(config_file.read())
