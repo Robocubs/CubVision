@@ -14,20 +14,21 @@ class ConfigSource:
 
 
 class FileConfigSource(ConfigSource):
-    # Default to FL config and calib
-    CONFIG_FILENAME = "configFL.json"
-    CALIBRATION_FILENAME = "calibrationFL.json"
+    # Look for specific config and calibration passed in through command line
+    try:
+        CONFIG_FILENAME = sys.argv[1]
+        CALIBRATION_FILENAME = sys.argv[2]
+    except IndexError:
+        # Default to FL config and calib
+        CONFIG_FILENAME = "configFL.json"
+        CALIBRATION_FILENAME = "calibrationFL.json"
 
     def __init__(self) -> None:
         pass
 
     def update(self, config_store: ConfigStore) -> None:
-        # Look for specific config and calibration passed in through command line
-        try:
-            self.CONFIG_FILENAME = sys.argv[1]
-            self.CALIBRATION_FILENAME = sys.argv[2]
-        except IndexError:
-            pass
+
+        print("using calib: " + self.CALIBRATION_FILENAME)
 
         # Get config
         with open(self.CONFIG_FILENAME, "r") as config_file:
