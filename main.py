@@ -40,8 +40,8 @@ if __name__ == "__main__":
     local_config_source.update(config)
     ntcore.NetworkTableInstance.getDefault().setServer(config.local_config.server_ip)
     ntcore.NetworkTableInstance.getDefault().startClient4(config.local_config.device_id)
-    stream_server.start(config)
 
+    started_server = False
     temp = 0
     thermal_zone_handle = None
     try: thermal_zone_handle = open("/sys/class/thermal/thermal_zone1/temp", "r")
@@ -52,6 +52,9 @@ if __name__ == "__main__":
     was_calibrating = False
     last_frame_caputre_time = time.time()
     while True:
+        if config.remote_config.should_stream and not started_server:
+            stream_server.start(config)
+            started_server = True
         remote_config_source.update(config)
         timestamp = time.time()
         success, image = capture.get_frame(config)
@@ -104,4 +107,5 @@ if __name__ == "__main__":
             time.sleep(0.5)
 
         last_frame_caputre_time = frame_capture_time
-        stream_server.set_frame(image, fps, latency)
+        if started_server:
+            stream_server.set_frame(image, fps, latency)
