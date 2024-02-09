@@ -27,9 +27,6 @@ class FileConfigSource(ConfigSource):
         pass
 
     def update(self, config_store: ConfigStore) -> None:
-
-        print("using calib: " + self.CALIBRATION_FILENAME)
-
         # Get config
         with open(self.CONFIG_FILENAME, "r") as config_file:
             config_data = json.loads(config_file.read())
