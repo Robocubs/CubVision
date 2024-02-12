@@ -17,10 +17,13 @@ from pipeline.CameraPoseEstimator import MultiTargetCameraPoseEstimator
 from pipeline.Capture import DefaultCapture, GStreamerCapture, StaticCapture
 from pipeline.FiducialDetector import ArucoFiducialDetector
 from pipeline.PoseEstimator import SquareTargetPoseEstimator
+from datetime import date
+
 
 DEMO_ID = 29
 
 if __name__ == "__main__":
+    print(f"--- Launching CubVision @ {date.today()}")
     config = ConfigStore(LocalConfig(), RemoteConfig())
     local_config_source: ConfigSource = FileConfigSource()
     remote_config_source: ConfigSource = NTConfigSource()
@@ -37,14 +40,21 @@ if __name__ == "__main__":
     local_config_source.update(config)
     ntcore.NetworkTableInstance.getDefault().setServer(config.local_config.server_ip)
     ntcore.NetworkTableInstance.getDefault().startClient4(config.local_config.device_id)
-    stream_server.start(config)
 
+    started_server = False
+    temp = 0
+    thermal_zone_handle = None
+    try: thermal_zone_handle = open("/sys/class/thermal/thermal_zone1/temp", "r")
+    except: pass
     frame_count = 0
     latency_sum = 0
     last_print = 0
     was_calibrating = False
     last_frame_caputre_time = time.time()
     while True:
+        if config.remote_config.should_stream and not started_server:
+            stream_server.start(config)
+            started_server = True
         remote_config_source.update(config)
         timestamp = time.time()
         success, image = capture.get_frame(config)
@@ -57,9 +67,13 @@ if __name__ == "__main__":
         frame_count += 1
         frame_capture_time = time.time()
         if frame_capture_time - last_print > 1:
+            # There is no perf impact when we measure temperature. In fact, this is quicker than the previous way of measuring which I'm embarassed of
+            if thermal_zone_handle != None:
+                thermal_zone_handle.seek(0)
+                temp = int(int(thermal_zone_handle.read().strip("\n")) / 1000)
             last_print = frame_capture_time
             fps = frame_count
-            print("Running at", frame_count, "fps, avg latency", int(latency_sum / frame_count), "ms")
+            # print("Running at", frame_count, "fps, avg latency", int(latency_sum / frame_count), "ms")
             frame_count = 0
             latency_sum = 0
 
@@ -85,7 +99,7 @@ if __name__ == "__main__":
                 demo_pose_observation = tag_pose_estimator.solve_fiducial_pose(demo_image_observations[0], config)
             latency = (time.time() - frame_capture_time) * 1000
             latency_sum += latency
-            output_publisher.send(config, timestamp, fiducial_pose_observations, camera_pose_observation, demo_pose_observation, fps, latency)
+            output_publisher.send(config, timestamp, fiducial_pose_observations, camera_pose_observation, demo_pose_observation, fps, latency, temp)
 
         else:
             # No calibration
@@ -93,4 +107,5 @@ if __name__ == "__main__":
             time.sleep(0.5)
 
         last_frame_caputre_time = frame_capture_time
-        stream_server.set_frame(image, fps, latency)
+        if started_server:
+            stream_server.set_frame(image, fps, latency)

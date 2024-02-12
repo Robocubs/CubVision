@@ -3,6 +3,7 @@ import json
 import cv2
 import ntcore
 import numpy
+import sys
 
 from config.config import ConfigStore, RemoteConfig
 
@@ -13,8 +14,14 @@ class ConfigSource:
 
 
 class FileConfigSource(ConfigSource):
-    CONFIG_FILENAME = "config.json"
-    CALIBRATION_FILENAME = "calibration.json"
+    # Look for specific config and calibration passed in through command line
+    try:
+        CONFIG_FILENAME = sys.argv[1]
+        CALIBRATION_FILENAME = sys.argv[2]
+    except IndexError:
+        # Default to FL config and calib
+        CONFIG_FILENAME = "configFL.json"
+        CALIBRATION_FILENAME = "calibrationFL.json"
 
     def __init__(self) -> None:
         pass
@@ -48,6 +55,7 @@ class NTConfigSource(ConfigSource):
     _camera_gain_sub: ntcore.IntegerSubscriber
     _fiducial_size_m_sub: ntcore.DoubleSubscriber
     _tag_layout_sub: ntcore.DoubleSubscriber
+    _should_stream_sub: ntcore.BooleanSubscriber
 
     def update(self, config_store: ConfigStore) -> None:
         # Initialize subscribers on first call
@@ -67,6 +75,8 @@ class NTConfigSource(ConfigSource):
                 "camera_gain").subscribe(RemoteConfig.camera_gain)
             self._fiducial_size_m_sub = nt_table.getDoubleTopic(
                 "fiducial_size_m").subscribe(RemoteConfig.fiducial_size_m)
+            self._should_stream_sub = nt_table.getBooleanTopic(
+                "should_stream").subscribe(RemoteConfig.should_stream)
             
             global_config_table = ntcore.NetworkTableInstance.getDefault().getTable("CubVision/config")
             self._tag_layout_sub = global_config_table.getStringTopic(
@@ -82,6 +92,7 @@ class NTConfigSource(ConfigSource):
         config_store.remote_config.camera_exposure = self._camera_exposure_sub.get()
         config_store.remote_config.camera_gain = self._camera_gain_sub.get()
         config_store.remote_config.fiducial_size_m = self._fiducial_size_m_sub.get()
+        config_store.remote_config.should_stream = self._should_stream_sub.get()
         try:
             config_store.remote_config.tag_layout = json.loads(self._tag_layout_sub.get())
         except:

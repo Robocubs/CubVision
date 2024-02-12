@@ -60,10 +60,11 @@ class MultiTargetCameraPoseEstimator(CameraPoseEstimator):
                 continue
             
             # Add object points by transforming from the tag center
-            corner_0 = tag_pose + Transform3d(Translation3d(0, fid_size / 2.0, -fid_size / 2.0), Rotation3d())
-            corner_1 = tag_pose + Transform3d(Translation3d(0, -fid_size / 2.0, -fid_size / 2.0), Rotation3d())
-            corner_2 = tag_pose + Transform3d(Translation3d(0, -fid_size / 2.0, fid_size / 2.0), Rotation3d())
-            corner_3 = tag_pose + Transform3d(Translation3d(0, fid_size / 2.0, fid_size / 2.0), Rotation3d())
+            half_fid_size = fid_size / 2.0
+            corner_0 = tag_pose + Transform3d(Translation3d(0, half_fid_size, -half_fid_size), Rotation3d())
+            corner_1 = tag_pose + Transform3d(Translation3d(0, -half_fid_size, -half_fid_size), Rotation3d())
+            corner_2 = tag_pose + Transform3d(Translation3d(0, -half_fid_size, half_fid_size), Rotation3d())
+            corner_3 = tag_pose + Transform3d(Translation3d(0, half_fid_size, half_fid_size), Rotation3d())
             all_object_points += [
                 wpilibTranslationToOpenCv(corner_0.translation()),
                 wpilibTranslationToOpenCv(corner_1.translation()),
@@ -83,10 +84,10 @@ class MultiTargetCameraPoseEstimator(CameraPoseEstimator):
             tag_ids.append(observation.tag_id)
             tag_poses.append(tag_pose)
 
-            object_points = numpy.array([[-fid_size / 2.0, fid_size / 2.0, 0.0],
-                                         [fid_size / 2.0, fid_size / 2.0, 0.0],
-                                         [fid_size / 2.0, -fid_size / 2.0, 0.0],
-                                         [-fid_size / 2.0, -fid_size / 2.0, 0.0]])
+            object_points = numpy.array([[-half_fid_size, half_fid_size, 0.0],
+                                         [half_fid_size, half_fid_size, 0.0],
+                                         [half_fid_size, -half_fid_size, 0.0],
+                                         [-half_fid_size, -half_fid_size, 0.0]])
             try:
                 _, rvecs, tvecs, errors = cv2.solvePnPGeneric(object_points, numpy.array(image_points),
                                                               config_store.local_config.camera_matrix, config_store.local_config.distortion_coefficients, flags=cv2.SOLVEPNP_IPPE_SQUARE)

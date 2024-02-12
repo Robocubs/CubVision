@@ -19,12 +19,11 @@ class NTPacketPublisher():
     _demo_observations_pub: ntcore.RawPublisher
     _fps_pub: ntcore.IntegerPublisher
     _heartbeat_pub: ntcore.IntegerPublisher
+    _temp_pub: ntcore.IntegerPublisher
 
-    def send(self, config_store: ConfigStore, timestamp: float, fiducial_pose_observations: List[FiducialPoseObservation], observation: Union[CameraPoseObservation, None], demo_observation: Union[FiducialPoseObservation, None], fps: Union[int, None], latency: float) -> None:
+    def send(self, config_store: ConfigStore, timestamp: float, fiducial_pose_observations: List[FiducialPoseObservation], observation: Union[CameraPoseObservation, None], demo_observation: Union[FiducialPoseObservation, None], fps: Union[int, None], latency: float, temp: int) -> None:
         # Initialize publishers on first call
         if not self._init_complete:
-            nt_table = ntcore.NetworkTableInstance.getDefault().getTable(
-                "CubVision/" + config_store.local_config.device_id + "/output")
             nt_table = ntcore.NetworkTableInstance.getDefault().getTable(
                 "CubVision/" + config_store.local_config.device_id + "/output")
             self._observations_pub = nt_table.getRawTopic("observations").publish("ObservationsPacket",
@@ -33,6 +32,7 @@ class NTPacketPublisher():
                 ntcore.PubSubOptions(periodic=0, sendAll=True, keepDuplicates=True))
             self._fps_pub = nt_table.getIntegerTopic("fps").publish()
             self._heartbeat_pub = nt_table.getIntegerTopic("heartbeat").publish()
+            self._temp_pub = nt_table.getIntegerTopic("temp").publish()
 
         # Build the observation
         observation_packet = Packet()
@@ -80,6 +80,7 @@ class NTPacketPublisher():
         if fps != None:
             self._fps_pub.set(fps)
 
+        self._temp_pub.set(temp)
 
 class NTOutputPublisher(OutputPublisher):
     _init_complete: bool = False

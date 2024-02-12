@@ -21,6 +21,7 @@ class RemoteConfig:
     camera_auto_exposure: int = 0
     camera_exposure: int = 0
     camera_gain: int = 0
+    should_stream: bool = False
     fiducial_size_m: float = 0
     tag_layout: any = None
 
