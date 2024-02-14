@@ -17,7 +17,3 @@ WARNING: This copies EVERYTHING, including the shared objects. Since we're in a 
 there really shouldn't be anything else installed here.
 """
 docker cp "$CONTAINER_ID":/usr/local/lib/ .
-
-# TODO: Get these automatically implemented, do not copy dirs in lib though
-#scp -r ./lib/ root@10.0.100.139:/usr/local/lib 
-#scp -r ./cv2 root@10.0.100.139:/usr/local/lib/python3.10/dist-packages/

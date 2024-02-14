@@ -105,7 +105,6 @@ class GStreamerCapture(Capture):
                 print("Starting capture session")
                 # If we're running on Darwin it's probably for testing/simulation
                 if os.uname().sysname != 'Darwin':
-                    # TODO: Recheck this command. I forgot to copy the commamd from the OrangePi to the official repo
                     """
                     gst-launch-1.0 v4l2src device=/dev/video0 extra_controls="c,exposure_auto=0,exposure_absolute=0,gain=0,sharpness=0,brightness=0" ! image/jpeg,format=MJPG,width=1280,height=720 ! jpegdec ! video/x-raw ! appsink drop=1
                     """
