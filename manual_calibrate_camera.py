@@ -11,5 +11,5 @@ if __name__ == "__main__":
         print("Calibrating with \"" + filename + "\"")
         image = cv2.imread(os.path.join(FOLDER_NAME, filename))
         calibration_session.process_frame(image, True)
-    calibration_session.finish()
+    calibration_session.finish(False)
     print("Finished calibration")
