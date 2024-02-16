@@ -38,7 +38,7 @@ class CalibrationSession:
 
                 # Save corners
                 if save:
-                    if charuco_ids.size > 4:
+                    if charuco_ids.size > 5:
                         self._all_charuco_corners.append(charuco_corners)
                         self._all_charuco_ids.append(charuco_ids)
                         print("Saved calibration frame")
