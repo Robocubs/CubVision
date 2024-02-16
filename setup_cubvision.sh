@@ -4,6 +4,8 @@
 
 echo "WiFi Connection May Be Needed!"
 
+apt-get update
+apt-get install gstreamer1.0
 pip3 install -r requirements.txt
 sudo cp /home/orangepi/CubVision/launch_cubvision.sh /etc/init.d
 sudo chmod +x /etc/init.d/launch_cubvision.sh
