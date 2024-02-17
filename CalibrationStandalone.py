@@ -9,12 +9,12 @@ from config.config import ConfigStore, LocalConfig, RemoteConfig
 from config.ConfigSource import ConfigSource, FileConfigSource
 from output.overlay_util import *
 from output.StreamServer import MjpegServer
-from pipeline.Capture import GStreamerCapture
+from pipeline.Capture import DefaultCapture
 from pipeline.FiducialDetector import ArucoFiducialDetector
 import pathlib
 
 config = ConfigStore(LocalConfig(), RemoteConfig())
-capture = GStreamerCapture()
+capture = DefaultCapture()
 local_config_source: ConfigSource = FileConfigSource()
 fiducial_detector = ArucoFiducialDetector(cv2.aruco.DICT_APRILTAG_36h11)
 stream_server = MjpegServer()
@@ -29,7 +29,7 @@ except IndexError:
 config.remote_config.camera_resolution_width = 1920
 config.remote_config.camera_resolution_height = 1200
 config.remote_config.camera_auto_exposure = 0
-config.remote_config.camera_exposure = 400
+config.remote_config.camera_exposure = 200
 
 
 local_config_source.update(config)
@@ -40,7 +40,7 @@ frame_count = 0
 last_print = 0
 last_frame_capture_time = time.time()
 
-while captured < 100:
+while captured < 200:
     timestamp = time.time()
     success, image = capture.get_frame(config)
     if not success:
@@ -52,7 +52,7 @@ while captured < 100:
     if frame_capture_time - last_print > 1:
         last_print = frame_capture_time
         fps = frame_count
-        print("Running at", frame_count, "fps,", captured, "captured frames")
+        print("Running at", frame_count, "fps,", image.shape[0], image.shape[1], "res,", captured, "captured frames")
         frame_count = 0
     save = False
     if timestamp - last_frame_capture_time > 1:
