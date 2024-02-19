@@ -1,5 +1,5 @@
 {
     "device_id": "CubVisionBL",
     "server_ip": "10.17.1.2",
-    "stream_port": 8003
+    "stream_port": 8000
 }
