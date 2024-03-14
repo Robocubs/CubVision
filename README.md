@@ -31,10 +31,15 @@ CubVision is meant to be a continuously-developed AprilTag tracking system for t
 > For MacOS, Linux **ONLY**
 1. If you need to rebuild OpenCV, head to the `docker` directory in the repository
 2. run `sh build_opencv.sh`. This will build and copy the `cv` package and the OpenCV shared libraries in `lib` to the `docker` directory.
-3. Use the commented `scp` commands located at the bottom of the `build_opencv.sh` to copy the directories over to a remote machine. TODO: Fix the issue with overwriting non .so's (see `build_opencv.sh`)
+3. Use the commented `scp` commands located at the bottom of the `build_opencv.sh` to copy the directories over to a remote machine.
 
 > Windows
 
 I have not tried Windows, but Docker does support it. You can run the image and get OpenCV built with ease, but the shell script may not work on command lines that are ported to Windows (like Git Bash). Advance **ONLY** if you know what you're doing!
 
-To fully install, copy the `CubVision` repo over to the coprocessor and change your directory to `CubVision`. Open and edit the `launch_cubvision.sh` script to match the commands for `CubVision` for a specific coprocessor (e.g. running the front-right camera). Run the `install_cubvision.sh` shell script after you edit the `launch_cubvision.sh` script. This should point the coprocessor to execute the `launch_cubvision.sh` script on startup.
+# Installation Instructions:
+1. Open and edit the `launch_cubvision.sh` script to match the commands for `CubVision` for a specific coprocessor (e.g. running the front-right camera) BEFORE copying to your coprocessor.
+
+2. Run the `copy_cubvision.sh` shell script from your host machine in the CubVision directory. This will copy the necessary files over.
+
+3. Run the `setup_cubvision.sh` shell script directly on the coprocessor after you edit the `launch_cubvision.sh` script.  This should point the coprocessor to execute the `launch_cubvision.sh` script on startup This may require a WiFi connection to install pip packages. Should the package installation hang, try adding an extra resource for `ntcore` like this `python3 -m pip install --extra-index-url=https://wpilib.jfrog.io/artifactory/api/pypi/wpilib-python-release-2024/simple robotpy`.

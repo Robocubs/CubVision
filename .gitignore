@@ -3,6 +3,7 @@ docker/cv2/
 docker/lib/
 docker/Opencv-package-and-lib-4.x
 *.gz
+calibration/distorted_reference.jpg
 
 # Byte-compiled / optimized / DLL files
 __pycache__/
@@ -167,3 +168,5 @@ cython_debug/
 #  and can be added to the global gitignore or merged into this file.  For a more nuclear
 #  option (not recommended) you can uncomment the following to ignore the entire idea folder.
 #.idea/
+calibration/distorted_reference.jpg
+calibration/distorted_reference.jpg

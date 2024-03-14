@@ -7,6 +7,7 @@ import numpy
 
 from config.ConfigSource import FileConfigSource
 
+from calibration.CalibrationVisualization import get_distorted_reference_image
 
 class CalibrationSession:
     _all_charuco_corners: List[numpy.ndarray] = []
@@ -37,14 +38,14 @@ class CalibrationSession:
 
                 # Save corners
                 if save:
-                    if charuco_ids.size > 4:
+                    if charuco_ids.size > 5:
                         self._all_charuco_corners.append(charuco_corners)
                         self._all_charuco_ids.append(charuco_ids)
                         print("Saved calibration frame")
                     else:
                         print("Bad frame: not enough ID's captured")
 
-    def finish(self) -> None:
+    def finish(self, ret_distorted_reference_image: bool) -> numpy.ndarray:
         if len(self._all_charuco_corners) == 0:
             print("ERROR: No calibration data")
             return
@@ -65,3 +66,9 @@ class CalibrationSession:
             print("Calibration finished")
         else:
             print("ERROR: Calibration failed")
+            return None
+        
+        if ret_distorted_reference_image:
+            return get_distorted_reference_image(camera_matrix, distortion_coefficients)
+        else:
+            return None

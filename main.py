@@ -18,6 +18,7 @@ from pipeline.Capture import DefaultCapture, GStreamerCapture, StaticCapture
 from pipeline.FiducialDetector import ArucoFiducialDetector
 from pipeline.PoseEstimator import SquareTargetPoseEstimator
 from datetime import date
+import pathlib
 
 
 DEMO_ID = 29
@@ -83,8 +84,12 @@ if __name__ == "__main__":
             calibration_session.process_frame(image, calibration_command_source.get_capture_flag(config))
 
         elif was_calibrating:
-            # Finish calibration
-            calibration_session.finish()
+            # Finish calibration, and set the final frame before we die
+            image = calibration_session.finish(True)
+            if started_server:
+                stream_server.set_frame(image, fps, latency)
+            
+            cv2.imwrite(str(pathlib.Path(__file__).parent.resolve()) + "/calibration/distorted_reference.jpg", image)
             sys.exit(0)
 
         elif config.local_config.has_calibration:
