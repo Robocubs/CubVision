@@ -97,7 +97,7 @@ class GStreamerCapture(Capture):
         bus_keys = config_store.remote_config.bus_keys
         valid_ids = config_store.remote_config.valid_ids
         if bus_keys == "" or valid_ids == []:
-            return -1
+            return config_store.remote_config.camera_id
         prefix = config_store.local_config.device_id.strip("CubVision")
         bus = ""
         for key in bus_keys:
@@ -106,6 +106,8 @@ class GStreamerCapture(Capture):
         
         if bus == "":
             return -1
+        
+        print(f"Looking for {bus} in {prefix}")
 
         for id in valid_ids:
             p = subprocess.run(["v4l2-ctl", f"-d{id}", "-D"], capture_output=True, text=True)
@@ -125,19 +127,18 @@ class GStreamerCapture(Capture):
             if config_store.remote_config.camera_id == -1:
                 print("No camera ID, waiting to start capture session")
             else:
-                print("Starting capture session")
                 # If we're running on Darwin it's probably for testing/simulation
                 if os.uname().sysname != 'Darwin':
                     """
                     gst-launch-1.0 v4l2src device=/dev/video0 extra_controls="c,exposure_auto=0,exposure_absolute=0,gain=0,sharpness=0,brightness=0" ! image/jpeg,format=MJPG,width=1280,height=720 ! jpegdec ! video/x-raw ! appsink drop=1
                     """
                     camera_id = self.get_id_for_buskey(config_store)
-                    if camera_id == -1:
-                        camera_id = config_store.remote_config.camera_id
+                    if camera_id != -1:
+                        print("Starting capture session")
+                        self._video = cv2.VideoCapture("gst-launch-1.0 v4l2src device=/dev/video" + str(camera_id) + " extra_controls=\"c,exposure_auto=" + str(config_store.remote_config.camera_auto_exposure) + ",exposure_absolute=" + str(
+                            config_store.remote_config.camera_exposure) + ",gain=" + str(config_store.remote_config.camera_gain) + ",sharpness=0,brightness=0\" ! image/jpeg,format=MJPG,width=" + str(config_store.remote_config.camera_resolution_width) + ",height=" + str(config_store.remote_config.camera_resolution_height) + " ! jpegdec ! video/x-raw ! appsink drop=1", cv2.CAP_GSTREAMER)
                     else:
-                        print("Using corrected camera ID")
-                    self._video = cv2.VideoCapture("gst-launch-1.0 v4l2src device=/dev/video" + str(camera_id) + " extra_controls=\"c,exposure_auto=" + str(config_store.remote_config.camera_auto_exposure) + ",exposure_absolute=" + str(
-                        config_store.remote_config.camera_exposure) + ",gain=" + str(config_store.remote_config.camera_gain) + ",sharpness=0,brightness=0\" ! image/jpeg,format=MJPG,width=" + str(config_store.remote_config.camera_resolution_width) + ",height=" + str(config_store.remote_config.camera_resolution_height) + " ! jpegdec ! video/x-raw ! appsink drop=1", cv2.CAP_GSTREAMER)
+                        print("Could not get camera ID")
                 else:
                     print("Detected Darwin, using default OpenCV pipeline")
                     self._video = cv2.VideoCapture(config_store.remote_config.camera_id)
