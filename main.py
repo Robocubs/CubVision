@@ -51,8 +51,10 @@ if __name__ == "__main__":
     latency_sum = 0
     last_print = 0
     was_calibrating = False
-    last_frame_caputre_time = time.time()
+    last_frame_capture_time = time.time()
+    start_time = time.time_ns() // 1_000_000
     while True:
+        output_publisher.set_heartbeat(start_time)
         if config.remote_config.should_stream and not started_server:
             stream_server.start(config)
             started_server = True
@@ -111,6 +113,6 @@ if __name__ == "__main__":
             print("No calibration found")
             time.sleep(0.5)
 
-        last_frame_caputre_time = frame_capture_time
+        last_frame_capture_time = frame_capture_time
         if started_server:
             stream_server.set_frame(image, fps, latency)

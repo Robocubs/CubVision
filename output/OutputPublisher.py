@@ -20,6 +20,11 @@ class NTPacketPublisher():
     _fps_pub: ntcore.IntegerPublisher
     _heartbeat_pub: ntcore.IntegerPublisher
     _temp_pub: ntcore.IntegerPublisher
+    _latency_pub: ntcore.IntegerPublisher
+
+    def set_heartbeat(self, start_time):
+        if self._init_complete:
+            self._heartbeat_pub.set(time.time_ns() // 1_000_000 - start_time)
 
     def send(self, config_store: ConfigStore, timestamp: float, fiducial_pose_observations: List[FiducialPoseObservation], observation: Union[CameraPoseObservation, None], demo_observation: Union[FiducialPoseObservation, None], fps: Union[int, None], latency: float, temp: int) -> None:
         # Initialize publishers on first call
@@ -31,8 +36,12 @@ class NTPacketPublisher():
             self._demo_observations_pub = nt_table.getRawTopic("demo_observations").publish("FiducialPoseObservation",
                 ntcore.PubSubOptions(periodic=0, sendAll=True, keepDuplicates=True))
             self._fps_pub = nt_table.getIntegerTopic("fps").publish()
-            self._heartbeat_pub = nt_table.getIntegerTopic("heartbeat").publish()
+            self._heartbeat_pub = nt_table.getIntegerTopic("heartbeat").publish(ntcore.PubSubOptions(keepDuplicates=False))
             self._temp_pub = nt_table.getIntegerTopic("temp").publish()
+            self._latency_pub = nt_table.getIntegerTopic("latency").publish()
+            self._init_complete = True
+
+        self._latency_pub.set(int(latency))
 
         # Build the observation
         observation_packet = Packet()
@@ -82,6 +91,7 @@ class NTPacketPublisher():
 
         self._temp_pub.set(temp)
 
+#Deprecated, we use the publisher above
 class NTOutputPublisher(OutputPublisher):
     _init_complete: bool = False
     _observations_pub: ntcore.DoubleArrayPublisher
@@ -98,6 +108,7 @@ class NTOutputPublisher(OutputPublisher):
             self._demo_observations_pub = nt_table.getDoubleArrayTopic("demo_observations").publish(
                 ntcore.PubSubOptions(periodic=0, sendAll=True, keepDuplicates=True))
             self._fps_pub = nt_table.getIntegerTopic("fps").publish()
+            self._init_complete = True
 
         # Send data
         if fps != None:
