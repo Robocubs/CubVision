@@ -56,6 +56,8 @@ class NTConfigSource(ConfigSource):
     _fiducial_size_m_sub: ntcore.DoubleSubscriber
     _tag_layout_sub: ntcore.DoubleSubscriber
     _should_stream_sub: ntcore.BooleanSubscriber
+    _valid_ids_sub: ntcore.IntegerArraySubscriber
+    _bus_keys_sub: ntcore.StringArraySubscriber
 
     def update(self, config_store: ConfigStore) -> None:
         # Initialize subscribers on first call
@@ -81,6 +83,8 @@ class NTConfigSource(ConfigSource):
             global_config_table = ntcore.NetworkTableInstance.getDefault().getTable("CubVision/config")
             self._tag_layout_sub = global_config_table.getStringTopic(
                 "tag_layout").subscribe("")
+            self._valid_ids_sub = global_config_table.getIntegerArrayTopic("valid_ids").subscribe([])
+            self._bus_keys_sub = global_config_table.getStringArrayTopic("bus_keys").subscribe([""])
             
             self._init_complete = True
 
@@ -98,3 +102,5 @@ class NTConfigSource(ConfigSource):
         except:
             config_store.remote_config.tag_layout = None
             pass
+        config_store.remote_config.valid_ids = self._valid_ids_sub.get()
+        config_store.remote_config.bus_keys = self._bus_keys_sub.get()
