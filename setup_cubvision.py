@@ -1,19 +1,14 @@
-import subprocess
+import os
 import sys
 
 #Can't be bothered to do this stuff in shell dude
-#TODO: Super messy script, but it works and I clean it up later.
-
-print("This script needs work")
-sys.exit(1)
 
 print("WiFi Connection May Be Needed!")
 
-
 try:
-    subprocess.run(["apt-get", "update"]) 
-    subprocess.run(["apt-get", "install", "gstreamer1.0"])
-    subprocess.run(["pip3 install", "-r", "requirements.txt"])
+    os.system("apt-get update")
+    os.system("apt-get install gstreamer1.0")
+    os.system("pip3 install -r requirements.txt")
 except FileNotFoundError:
     pass
 
@@ -39,16 +34,22 @@ elif suffix == "Sniper":
     valid = True
     ss = [suffix]
 
-runcommands = []
+runcommands = ""
 for i in ss:
-    runcommands.append(f"python3 /home/orangepi/CubVision/main.py /home/orangepi/CubVision/config{i}.json /home/orangepi/CubVision/calibration{i}.json &>> /home/orangepi/CubVision/log{i}.txt &\n")
+    runcommands += f"\npython3 /home/orangepi/CubVision/main.py /home/orangepi/CubVision/config{i}.json /home/orangepi/CubVision/calibration{i}.json &>> /home/orangepi/CubVision/log{i}.txt &\n"
 
-open("launch_cubvision.sh", "w").close()
-with open("launch_cubvision.sh", "w+") as f:
-    lines = f.readlines()
-    f.truncate()
-    for i in range(10, len(runcommands)):
-        lines[i] = runcommands[i]
-    f.writelines(lines)
+base = open("launch_cubvision_base.sh", "r")
+actual = open("launch_cubvision.sh", "w")
 
+actual.write(base.read() + runcommands)
+
+base.close()
+actual.close()
+
+os.system("cp /home/orangepi/CubVision/launch_cubvision.sh /etc/init.d")
+os.system("chmod +x /etc/init.d/launch_cubvision.sh")
+os.system("sed -i '13i sh /etc/init.d/launch_cubvision.sh' /etc/rc.local")
+os.system("systemctl enable rc-local.service")
+
+print("Installed CubVision")
 

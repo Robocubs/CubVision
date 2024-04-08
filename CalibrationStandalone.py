@@ -10,13 +10,11 @@ from config.ConfigSource import ConfigSource, FileConfigSource
 from output.overlay_util import *
 from output.StreamServer import MjpegServer
 from pipeline.Capture import DefaultCapture
-from pipeline.FiducialDetector import ArucoFiducialDetector
 import pathlib
 
 config = ConfigStore(LocalConfig(), RemoteConfig())
 capture = DefaultCapture()
 local_config_source: ConfigSource = FileConfigSource()
-fiducial_detector = ArucoFiducialDetector(cv2.aruco.DICT_APRILTAG_36h11)
 stream_server = MjpegServer()
 calibration_session = CalibrationSession()
 
@@ -26,7 +24,7 @@ except IndexError:
     print("python3 CalibrationStandalone.py [config] [calibration] [cameraID]")
     sys.exit(1)
 
-config.remote_config.camera_resolution_width = 1920
+config.remote_config.camera_resolution_width = 1600
 config.remote_config.camera_resolution_height = 1200
 config.remote_config.camera_auto_exposure = 0
 config.remote_config.camera_exposure = 200

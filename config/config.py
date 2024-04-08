@@ -1,4 +1,4 @@
-from dataclasses import dataclass
+from dataclasses import dataclass, field
 import numpy
 import numpy.typing
 
@@ -24,6 +24,8 @@ class RemoteConfig:
     should_stream: bool = False
     fiducial_size_m: float = 0
     tag_layout: any = None
+    valid_ids: list = field(default_factory=list) 
+    bus_keys: list = field(default_factory=list) 
 
 
 @dataclass
