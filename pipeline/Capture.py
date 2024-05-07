@@ -70,17 +70,23 @@ class DefaultCapture(Capture):
             self._video.release()
             self._video = None
 
-        if self._video == None:
-            self._video = cv2.VideoCapture(config_store.remote_config.camera_id)
-            self._video.set(cv2.CAP_PROP_FRAME_WIDTH, config_store.remote_config.camera_resolution_width)
-            self._video.set(cv2.CAP_PROP_FRAME_HEIGHT, config_store.remote_config.camera_resolution_height)
-            self._video.set(cv2.CAP_PROP_AUTO_EXPOSURE, config_store.remote_config.camera_auto_exposure)
-            self._video.set(cv2.CAP_PROP_EXPOSURE, config_store.remote_config.camera_exposure)
-            self._video.set(cv2.CAP_PROP_GAIN, config_store.remote_config.camera_gain)
+        if config_store.remote_config.camera_id == -1:
+                print("No camera ID, waiting to start capture session")
+        else:  
+            if self._video == None:
+                self._video = cv2.VideoCapture(config_store.remote_config.camera_id)
+                # self._video.set(cv2.CAP_PROP_FRAME_WIDTH, config_store.remote_config.camera_resolution_width)
+                # self._video.set(cv2.CAP_PROP_FRAME_HEIGHT, config_store.remote_config.camera_resolution_height)
+                # self._video.set(cv2.CAP_PROP_AUTO_EXPOSURE, config_store.remote_config.camera_auto_exposure)
+                # self._video.set(cv2.CAP_PROP_EXPOSURE, config_store.remote_config.camera_exposure)
+                # self._video.set(cv2.CAP_PROP_GAIN, config_store.remote_config.camera_gain)
 
         self._last_config = config_store
 
-        retval, image = self._video.read()
+        if self._video != None:
+            retval, image = self._video.read()
+        else:
+            return False, cv2.Mat(numpy.ndarray([]))
         return retval, image
 
 

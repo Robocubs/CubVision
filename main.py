@@ -30,7 +30,7 @@ if __name__ == "__main__":
     remote_config_source: ConfigSource = NTConfigSource()
     calibration_command_source: CalibrationCommandSource = NTCalibrationCommandSource()
 
-    capture = GStreamerCapture()
+    capture = DefaultCapture()
     fiducial_detector = ArucoFiducialDetector(cv2.aruco.DICT_APRILTAG_36h11)
     camera_pose_estimator = MultiTargetCameraPoseEstimator()
     tag_pose_estimator = SquareTargetPoseEstimator()
@@ -53,6 +53,11 @@ if __name__ == "__main__":
     was_calibrating = False
     last_frame_capture_time = time.time()
     start_time = time.time_ns() // 1_000_000
+
+    # More benchmarking
+    fiducial_detection_time = last_frame_capture_time
+    solvepnp_solve_time = last_frame_capture_time
+
     while True:
         output_publisher.set_heartbeat(start_time)
         if config.remote_config.should_stream and not started_server:
@@ -96,9 +101,11 @@ if __name__ == "__main__":
 
         elif config.local_config.has_calibration:
             # Normal mode
+            start_detection = time.time()
             image_observations = fiducial_detector.detect_fiducials(image, config)
+            fiducial_detection_time = time.time() - start_detection
             [overlay_image_observation(image, x) for x in image_observations]
-            fiducial_pose_observations, camera_pose_observation = camera_pose_estimator.solve_camera_pose(
+            fiducial_pose_observations, camera_pose_observation, solvepnp_solve_time = camera_pose_estimator.solve_camera_pose(
                 [x for x in image_observations if x.tag_id != DEMO_ID], config)
             demo_image_observations = [x for x in image_observations if x.tag_id == DEMO_ID]
             demo_pose_observation: Union[FiducialPoseObservation, None] = None
@@ -107,6 +114,7 @@ if __name__ == "__main__":
             latency = (time.time() - frame_capture_time) * 1000
             latency_sum += latency
             output_publisher.send(config, timestamp, fiducial_pose_observations, camera_pose_observation, demo_pose_observation, fps, latency, temp)
+            output_publisher.send_perf(fiducial_detection_time, solvepnp_solve_time)
 
         else:
             # No calibration

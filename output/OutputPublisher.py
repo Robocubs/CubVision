@@ -22,9 +22,17 @@ class NTPacketPublisher():
     _temp_pub: ntcore.IntegerPublisher
     _latency_pub: ntcore.IntegerPublisher
 
+    _fdt_pub: ntcore.FloatPublisher
+    _sst_pub: ntcore.FloatPublisher
+
     def set_heartbeat(self, start_time):
         if self._init_complete:
             self._heartbeat_pub.set(time.time_ns() // 1_000_000 - start_time)
+
+    def send_perf(self, fiducal_detection_time: float, solvepnp_solve_time: float) -> None:
+        self._fdt_pub.set(fiducal_detection_time)
+        self._sst_pub.set(solvepnp_solve_time)
+        
 
     def send(self, config_store: ConfigStore, timestamp: float, fiducial_pose_observations: List[FiducialPoseObservation], observation: Union[CameraPoseObservation, None], demo_observation: Union[FiducialPoseObservation, None], fps: Union[int, None], latency: float, temp: int) -> None:
         # Initialize publishers on first call
@@ -39,6 +47,12 @@ class NTPacketPublisher():
             self._heartbeat_pub = nt_table.getIntegerTopic("heartbeat").publish(ntcore.PubSubOptions(keepDuplicates=False))
             self._temp_pub = nt_table.getIntegerTopic("temp").publish()
             self._latency_pub = nt_table.getIntegerTopic("latency").publish()
+
+            nt_table = ntcore.NetworkTableInstance.getDefault().getTable(
+                "CubVision/" + config_store.local_config.device_id + "/output")
+            self._fdt_pub = nt_table.getFloatTopic("FiducialDetectionTimeMS").publish()
+            self._sst_pub = nt_table.getFloatTopic("SolvePnPSolveTimeNS").publish()
+
             self._init_complete = True
 
         self._latency_pub.set(int(latency))

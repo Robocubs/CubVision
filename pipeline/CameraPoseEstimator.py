@@ -5,6 +5,7 @@ import numpy
 from config.config import ConfigStore
 from vision_types import CameraPoseObservation, FiducialImageObservation, FiducialPoseObservation
 from wpimath.geometry import *
+import time
 
 from pipeline.coordinate_systems import (openCvPoseToWpilib,
                                          wpilibTranslationToOpenCv)
@@ -22,14 +23,14 @@ class MultiTargetCameraPoseEstimator(CameraPoseEstimator):
     def __init__(self) -> None:
         pass
 
-    def solve_camera_pose(self, image_observations: List[FiducialImageObservation], config_store: ConfigStore) -> Tuple[List[FiducialPoseObservation], Union[CameraPoseObservation, None]]:
+    def solve_camera_pose(self, image_observations: List[FiducialImageObservation], config_store: ConfigStore) -> Tuple[List[FiducialPoseObservation], Union[CameraPoseObservation, None], float]:
         # Exit if no tag layout available
         if config_store.remote_config.tag_layout == None:
-            return [], None
+            return [], None, 0.0
 
         # Exit if no observations available
         if len(image_observations) == 0:
-            return [], None
+            return [], None, 0.0
 
         # Create set of object and image points
         fid_size = config_store.remote_config.fiducial_size_m
@@ -38,6 +39,8 @@ class MultiTargetCameraPoseEstimator(CameraPoseEstimator):
         tag_ids = []
         tag_poses: List[Pose3d] = []
         fiducial_observations: List[FiducialPoseObservation] = []
+
+        solvepnp_start_time = 0.0
 
         for observation in image_observations:
             tag_pose = None
@@ -89,8 +92,10 @@ class MultiTargetCameraPoseEstimator(CameraPoseEstimator):
                                          [half_fid_size, -half_fid_size, 0.0],
                                          [-half_fid_size, -half_fid_size, 0.0]])
             try:
+                solvepnp_start_time = time.time_ns()
                 _, rvecs, tvecs, errors = cv2.solvePnPGeneric(object_points, numpy.array(image_points),
                                                               config_store.local_config.camera_matrix, config_store.local_config.distortion_coefficients, flags=cv2.SOLVEPNP_IPPE_SQUARE)
+                solvepnp_solve_time = time.time_ns() - solvepnp_start_time
             except:
                 continue
 
@@ -112,14 +117,16 @@ class MultiTargetCameraPoseEstimator(CameraPoseEstimator):
             camera_pose_0 = tag_poses[0].transformBy(tag_to_camera_pose_0)
             tag_to_camera_pose_1 = fiducial_observations[0].pose_1.inverse()
             camera_pose_1 = tag_poses[0].transformBy(tag_to_camera_pose_1)
-            return fiducial_observations, CameraPoseObservation(tag_ids, camera_pose_0, fiducial_observations[0].error_0, camera_pose_1, fiducial_observations[0].error_1)
+            return fiducial_observations, CameraPoseObservation(tag_ids, camera_pose_0, fiducial_observations[0].error_0, camera_pose_1, fiducial_observations[0].error_1), solvepnp_solve_time
 
         # Run SolvePNP with all tags
         try:
+            solvepnp_start_time = time.time_ns()
             _, rvecs, tvecs, errors = cv2.solvePnPGeneric(numpy.array(all_object_points), numpy.array(all_image_points),
                                                             config_store.local_config.camera_matrix, config_store.local_config.distortion_coefficients, flags=cv2.SOLVEPNP_SQPNP)
+            solvepnp_solve_time = time.time_ns() - solvepnp_start_time
         except:
-            return fiducial_observations, None
+            return fiducial_observations, None, solvepnp_solve_time
 
         # Calculate WPILib camera pose
         camera_to_field_pose = openCvPoseToWpilib(tvecs[0], rvecs[0])
@@ -128,4 +135,4 @@ class MultiTargetCameraPoseEstimator(CameraPoseEstimator):
         field_to_camera_pose = Pose3d(field_to_camera.translation(), field_to_camera.rotation())
 
         # Return result
-        return fiducial_observations, CameraPoseObservation(tag_ids, field_to_camera_pose, errors[0][0], None, None)
+        return fiducial_observations, CameraPoseObservation(tag_ids, field_to_camera_pose, errors[0][0], None, None), solvepnp_solve_time

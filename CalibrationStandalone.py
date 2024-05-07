@@ -38,7 +38,7 @@ frame_count = 0
 last_print = 0
 last_frame_capture_time = time.time()
 
-while captured < 200:
+while captured < 40:
     timestamp = time.time()
     success, image = capture.get_frame(config)
     if not success:
